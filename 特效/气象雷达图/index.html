@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <link rel="stylesheet" href="/public/CesiumUnminified/Widgets/widgets.css">
+  <script src="/public/CesiumUnminified/Cesium.js"></script>
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+      imageryProvider: new Cesium.UrlTemplateImageryProvider({
+        subdomains: ["1", "2", "3"],
+        url: 'http://mt{s}.google.cn/vt/lyrs=s&hl=zh-CN&x={x}&y={y}&z={z}'
+      })
+    });
+
+    viewer.camera.setView({
+      destination: Cesium.Rectangle.fromDegrees(89.5, 20.4, 110.4, 61.2)
+    });
+
+    var urls = [
+      '/public/Radar/201906211112.PNG',
+      '/public/Radar/201906211124.PNG',
+      '/public/Radar/201906211130.PNG',
+      '/public/Radar/201906211136.PNG',
+      '/public/Radar/201906211142.PNG'
+    ];
+
+    var positions = [
+      Cesium.Cartesian3.fromDegrees(73.16895, 12.2023),
+      Cesium.Cartesian3.fromDegrees(134.86816, 12.2023),
+      Cesium.Cartesian3.fromDegrees(134.86816, 54.11485),
+      Cesium.Cartesian3.fromDegrees(73.16895, 54.11485)
+    ];
+
+    var i = 0;
+    viewer.entities.add({
+      polygon: {
+        // 平铺到区域内
+        hierarchy: new Cesium.PolygonHierarchy(positions),
+        heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+        material: new Cesium.ImageMaterialProperty({
+          image: new Cesium.CallbackProperty(function () {
+            return urls[i];
+          }, false),
+          color: Cesium.Color.WHITE.withAlpha(0.6)
+        })
+      }
+    });
+
+    setInterval(function () {
+      i++;
+      if (i == urls.length) {
+        i = 0;
+      }
+    }, 1000);
+  </script>
+  </div>
+</body>
+
+</html>

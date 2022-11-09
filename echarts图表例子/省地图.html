@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>中国地图</title>
+  <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.0/dist/echarts.min.js"></script>
+  <!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/echarts/map/js/china.js"></script> -->
+  <script src="https://cdn.jsdelivr.net/npm/axios@1.1.3/dist/axios.min.js"></script>
+  <style>
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="main" style="width: 80%;height:80%"></div>
+  <script>
+    let queryObj = {}
+    location.href.split('?')[1].split('&').map(item => {
+      let [key, value] = item.split('=')
+      queryObj[key] = decodeURIComponent(value)
+    })
+
+    let code = queryObj['code']
+    let name = queryObj['name']
+
+    let myChart
+
+    // 地图 geojson
+    // http://datav.aliyun.com/portal/school/atlas/area_selector#&lat=31.769817845138945&lng=104.29901249999999&zoom=4
+    axios.get(`https://geo.datav.aliyun.com/areas_v3/bound/geojson?code=${code}_full`).then(res => {
+      console.log('res', res)
+      // 注册中国地图
+      echarts.registerMap('province', { geoJSON: res.data })
+
+      myChart = echarts.init(document.getElementById("main"))
+
+      let data = res.data.features.map(item => {
+        let { properties } = item
+        return {
+          ...properties,
+          value: parseInt(Math.random() * 100)
+        }
+      })
+      myChart.setOption(option = {
+        title: {
+          text: name,
+        },
+        toolbox: {
+          show: true,
+          orient: 'vertical',
+          left: 'right',
+          top: 'center',
+          feature: {
+            dataView: { readOnly: false },
+            restore: {},
+            saveAsImage: {}
+          }
+        },
+        tooltip: {
+          //数据格式化
+          formatter: function (params, callback) {
+            return (
+              params.seriesName + "<br />" + params.name + "：" + params.value
+            );
+          },
+        },
+        visualMap: {
+          min: 0,
+          max: 100,
+          left: "left",
+          top: "bottom",
+          text: ["高", "低"], //取值范围的文字
+          inRange: {
+            color: ["#e0ffff", "blue"], //取值范围的颜色
+          },
+          show: true, //图注
+        },
+        series: [
+          {
+            name: '市',
+            type: "map",
+            map: "province",
+            roam: true, //不开启缩放和平移
+            zoom: 1.1, //视角缩放比例
+            label: {
+              normal: {
+                show: true,
+                fontSize: "10",
+                color: "#fff",
+              },
+            },
+            itemStyle: {
+              normal: {
+                borderColor: "rgba(0, 0, 0, 0.2)",
+              },
+              emphasis: { //高亮的显示设置
+                areaColor: "skyblue", //鼠标选择区域颜色
+                shadowOffsetX: 0,
+                shadowOffsetY: 0,
+                shadowBlur: 20,
+                borderWidth: 0,
+                shadowColor: "rgba(0, 0, 0, 0.5)",
+              },
+            },
+            data: data
+          },
+        ]
+      });
+    })
+
+    // 地图下钻, 有下级可继续下钻
+  </script>
+</body>
+
+</html>

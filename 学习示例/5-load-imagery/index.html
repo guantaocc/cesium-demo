@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    // 注册cesium icon token
+    // Your access token can be found at: https://cesium.com/ion/tokens.
+    // Replace `your_access_token` with your Cesium ion access token.
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYTcyNGU3OC0yOTUzLTQ1N2UtYjA2MS1lZjY5ZTlhODdjZWQiLCJpZCI6MTEwNTE3LCJpYXQiOjE2NjUzMDQ2Mzd9.4O-a0UjkuBlv2Pb0yDMsWNMqZbQxUEkw0RQ2GMZ7JV4';
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      imageryProvider: Cesium.createWorldImagery({
+        style: Cesium.IonWorldImageryStyle.AERIAL_WITH_LABELS
+      }),
+      baseLayerPicker: false
+    });
+
+
+    var layers = viewer.scene.imageryLayers;
+    // 星空底层
+    var blackMarble = layers.addImageryProvider(new Cesium.IonImageryProvider({ assetId: 1350375 }));
+    // 调整透明度混合 与底图进行混合
+    blackMarble.alpha = 0.5;
+    // 将图层调亮 来混合 图层
+    blackMarble.brightness = 2.0;
+
+    // 添加普通图片的图层
+    
+    let sigleImageLayer = layers.addImageryProvider(new Cesium.SingleTileImageryProvider({
+        url : '../datas/logo.png',
+        rectangle : Cesium.Rectangle.fromDegrees(-75.0, 28.0, -72.0, 29.75)
+    }));
+
+    console.log(sigleImageLayer)
+    sigleImageLayer.alpha = 0.8
+    sigleImageLayer.brightness = 1.5
+
+  </script>
+  </div>
+</body>
+
+</html>

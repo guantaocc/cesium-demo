@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    // 注册cesium icon token
+    // Your access token can be found at: https://cesium.com/ion/tokens.
+    // Replace `your_access_token` with your Cesium ion access token.
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYTcyNGU3OC0yOTUzLTQ1N2UtYjA2MS1lZjY5ZTlhODdjZWQiLCJpZCI6MTEwNTE3LCJpYXQiOjE2NjUzMDQ2Mzd9.4O-a0UjkuBlv2Pb0yDMsWNMqZbQxUEkw0RQ2GMZ7JV4';
+
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrainProvider: Cesium.createWorldTerrain()
+    });    
+    // Add Cesium OSM Buildings, a global 3D buildings layer.
+    const buildingTileset = viewer.scene.primitives.add(Cesium.createOsmBuildings());   
+    // Fly the camera to San Francisco at the given longitude, latitude, and height.
+    const dataPoint = { longitude: -122.38985, latitude: 37.61864, height: -27.32 };
+  // Mark this location with a red point.
+  const pointEntity = viewer.entities.add({
+    description: `First data point at (${dataPoint.longitude}, ${dataPoint.latitude})`,
+    position: Cesium.Cartesian3.fromDegrees(dataPoint.longitude, dataPoint.latitude, dataPoint.height),
+    point: { pixelSize: 10, color: Cesium.Color.RED }
+  });
+  // Fly the camera to this point.
+  viewer.flyTo(pointEntity);
+  </script>
+ </div>
+</body>
+</html>

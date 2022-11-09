@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <link rel="stylesheet" href="/public/supermap/Build/Cesium/Widgets/widgets.css">
+  <script src="/public/supermap/Build/Cesium/Cesium.js"></script>
+  <script src="/public/supermap-config.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.js"></script>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .cesiumContainer {
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+    }
+    .buttons {
+      position: absolute;
+      left: 20px;
+      top: 40px;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <div class="buttons">
+    <button id="active">加载高清影像</button>
+    <button id="clear">清除</button>
+  </div>
+  <script>
+    Cesium.Credential.CREDENTIAL = new Cesium.Credential(
+      'sGMMXrbF8AU9dz_pYn1PoAGyPt-ulonEtmP66M0XGXRdYtbWg79k-i1s_6VxmnShJOk6Wp_K9CqOQlMQBKghZQ77YYFvVGbvcFGQ0C4f4yEpzeHhbSIEoluDZgLQoM24i4lAUorXAz51alfKodYfjSff',
+      "token"
+    );
+
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+    });
+
+    viewer.imageryLayers.addImageryProvider(new Cesium.BingMapsImageryProvider({
+      url: 'https://dev.virtualearth.net',
+      mapStyle: Cesium.BingMapsStyle.AERIAL,
+      key: URL_CONFIG.BING_MAP_KEY
+    }));
+
+    let scene = viewer.scene
+
+    const position = {
+      lontitude: 119.925297924,
+      latitude: 30.07939717989,
+      height: 30,
+    }
+
+    // const position = {
+    //   lontitude: 113.91483485343562,
+    //   latitude: 35.31921353519262,
+    //   height: 30,
+    // }
+
+    viewer.camera.flyTo({
+      destination: Cesium.Cartesian3.fromDegrees(position.lontitude, position.latitude, position.height),
+      orientation: {
+        // 水平 - 正北 - 向右为负数
+        heading: Cesium.Math.toRadians(0),
+        // 上下旋转 - 俯视朝向 - 向上为负数
+        pitch: Cesium.Math.toRadians(-90),
+        roll: 0,
+      },
+    })
+
+    // http://amana.caasbee.com/iserver/services/NKYjingwaiyanjiusuo/rest/maps/农田灌溉研究所_Level_20@农田灌溉研究所_Level_20
+    // http://10.200.37.56:8090/iserver/services/map-sdtest/rest/maps/testsd_Level_20@testsd_Level_20
+    function loadSuperMapLayerByName(mapName) {
+      let imageryLayers = viewer.imageryLayers;
+      let SupermapProvider = new Cesium.SuperMapImageryProvider({
+        url: `http://10.200.37.56:8090/iserver/services/map-sdtest/rest/maps/testsd_Level_20@testsd_Level_20`,
+        transparent: true,
+        credit: "",
+        highResolution: true,
+      });
+      // 异步加载 superMap的地图 promise
+      SupermapProvider.readyPromise.then(() => {
+        let layer = imageryLayers.addImageryProvider(SupermapProvider);
+        layer.alpha = 0.8;
+      });
+    }
+
+    $("#active").click(function () {
+      loadSuperMapLayerByName(name)
+    })
+
+  </script>
+  </div>
+</body>
+
+</html>

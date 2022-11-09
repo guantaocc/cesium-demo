@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="/public/CesiumUnminified/Widgets/widgets.css">
+  <script src="/public/CesiumUnminified/Cesium.js"></script>
+  <!-- 坐标纠偏库 -->
+  <script src="https://cdn.jsdelivr.net/npm/gcoord@0.3.2/dist/gcoord.min.js"></script>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    #cesiumContainer {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+    });
+
+    // 通过 Scheme 进行位置纠偏
+
+    // 参考坐标转化
+    // https://gitcode.net/mirrors/dvgis/cesium-map/-/tree/master/src
+
+    class AmapMercatorProjection extends Cesium.WebMercatorProjection {
+      project(cartographic, result) {
+        const correct = gcoord.transform([Cesium.Math.toDegrees(cartographic.longitude), Cesium.Math.toDegrees(cartographic.latitude)], gcoord.WGS84, gcoord.GCJ02)
+        cartographic.longitude = Cesium.Math.toRadians(correct[0])
+        cartographic.latitude = Cesium.Math.toRadians(correct[1])
+        return super.project(cartographic, result)
+      }
+      unproject(cartesian, result) {
+        result = super.unproject(cartesian, result)
+        const correct = gcoord.transform([Cesium.Math.toDegrees(result.longitude), Cesium.Math.toDegrees(result.latitude)], gcoord.GCJ02, gcoord.WGS84)
+        result.longitude = Cesium.Math.toRadians(correct[0])
+        result.latitude = Cesium.Math.toRadians(correct[1])
+        return new Cesium.Cartographic(
+          result.longitude,
+          result.latitude
+        )
+      }
+    }
+
+    class AmapMercatorTilingScheme extends Cesium.WebMercatorTilingScheme {
+      constructor(options) {
+        super(options)
+        this._projection = new AmapMercatorProjection(this._ellipsoid);
+      }
+    }
+
+    viewer.imageryLayers.removeAll()
+    // Add Cesium OSM Buildings, a global 3D buildings layer.
+    // 电子地图
+    // https://webrd04.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scale=1&style=7
+    // 影像地图
+    // https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}
+    // 注记地图
+    // http://webst02.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scale=1&style=8
+
+    viewer.imageryLayers.addImageryProvider(
+      new Cesium.UrlTemplateImageryProvider({
+        name: 'amap',
+        url: 'https://webst02.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}',
+        minimumLevel: 1,
+        maximumLevel: 18,
+        tilingScheme: new AmapMercatorTilingScheme(),
+        subdomains: ['01', '02', '03', '04']
+      })
+    )
+    // 注记
+    viewer.imageryLayers.addImageryProvider(
+      new Cesium.UrlTemplateImageryProvider({
+        name: 'amap',
+        url: 'http://webst02.is.autonavi.com/appmaptile?x={x}&y={y}&z={z}&lang=zh_cn&size=1&scale=1&style=8',
+        minimumLevel: 1,
+        maximumLevel: 18,
+        tilingScheme: new AmapMercatorTilingScheme(),
+      })
+    )
+    console.log(viewer.imageryLayers.get(0))
+  </script>
+  </div>
+</body>
+
+</html>

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    // 注册cesium icon token
+    // Your access token can be found at: https://cesium.com/ion/tokens.
+    // Replace `your_access_token` with your Cesium ion access token.
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYTcyNGU3OC0yOTUzLTQ1N2UtYjA2MS1lZjY5ZTlhODdjZWQiLCJpZCI6MTEwNTE3LCJpYXQiOjE2NjUzMDQ2Mzd9.4O-a0UjkuBlv2Pb0yDMsWNMqZbQxUEkw0RQ2GMZ7JV4';
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrainProvider : Cesium.createWorldTerrain({
+        requestVertexNormals: true,
+        requestWaterMask: true
+      })
+    });
+    // 光暗 模式
+    viewer.scene.globe.enableLighting = false;
+    // viewer.camera.flyTo({
+    // destination: Cesium.Cartesian3.fromDegrees(-117.16, 32.71, 15000.0),
+    //     orientation: {
+    //       // 0 为正北
+    //       heading: Cesium.Math.toRadians(20.0),
+    //       // 向下俯视
+    //       pitch: Cesium.Math.toRadians(-35.0),
+    //       roll: 0.0,
+    //     },
+    // });
+
+    // 工具，显示要选择的位置
+    var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    handler.setInputAction(function (event) {
+      var pickedPosition = viewer.scene.pickPosition(event.position);
+      if (Cesium.defined(pickedPosition)) {
+        // 转换经纬度
+        let { x, y } = pickedPosition
+        //笛卡尔世界坐标转经纬度弧度坐标
+        let cartographic = viewer.scene.globe.ellipsoid.cartesianToCartographic(pickedPosition);
+        const { longitude, latitude, height} = cartographic
+        // 弧度坐标 -> 经纬度坐标
+        console.log(cartographic, `经纬度[${Cesium.Math.toDegrees(longitude)}, ${Cesium.Math.toDegrees(latitude)}]`)
+      }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+
+    // pick 实体
+    var handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+      handler.setInputAction(function (movement) {
+        var pick = scene.pick(movement.position);
+        if (Cesium.defined(pick) && (pick.id === 'my rectangle')) {
+          console.log('Mouse clicked rectangle.');
+        }
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    // fly to an asset
+    // var west = -90.0;
+    // var south = 38.0;
+    // var east = -87.0;
+    // var north = 40.0;
+    // var rectangle = viewer.entities.add({
+    //   rectangle: {
+    //       coordinates: Cesium.Rectangle.fromDegrees(west, south, east, north),
+    //   },
+    // });
+    // viewer.flyTo(rectangle);
+
+    // easing function
+    // viewer.camera.flyTo({
+    //   destination : new Cesium.Cartesian3(-3961951.575572026, 3346492.0945766014, 3702340.5336036095),
+    //   orientation : {
+    //       direction : new Cesium.Cartesian3(0.8982074415844437, -0.4393530288745287, 0.013867512433959908),
+    //       up : new Cesium.Cartesian3(0.12793638617798253, 0.29147314437764565, 0.9479850669701113),
+    //   },
+    //   complete: function () {
+    //     setTimeout(function () {
+    //       viewer.camera.flyTo({
+    //         destination : new Cesium.Cartesian3(-2304817.2435183465, -3639113.128132953, 4688495.013644141),
+    //         orientation : {
+    //             direction : new Cesium.Cartesian3(0.3760550186878076, 0.9007147395506565, 0.21747547189489164),
+    //             up : new Cesium.Cartesian3(-0.20364591529594356, -0.14862471084230877, 0.9676978022659334),
+    //         },
+    //         easingFunction: Cesium.EasingFunction.QUADRATIC_IN_OUT,
+    //         duration: 5
+    //       });
+    //     }, 1000);
+    //   },
+    // });
+
+    // 聚焦一个建筑，聚焦 lookAt
+    var center = Cesium.Cartesian3.fromRadians(2.4213211833389243, 0.6171926869414084, 3626.0426275055174);
+    var transform = Cesium.Transforms.eastNorthUpToFixedFrame(center);
+    viewer.scene.camera.lookAtTransform(transform, new Cesium.HeadingPitchRange(0, -Math.PI/4, 2900));
+    
+    // 沿着 控制点旋转
+    // viewer.clock.onTick.addEventListener(function(clock) {
+    //   viewer.scene.camera.rotateRight(0.005);
+    // });
+    
+    // 是否允许相机进入 地下
+    viewer.scene.screenSpaceCameraController.enableCollisionDetection = false;
+  </script>
+  </div>
+</body>
+
+</html>

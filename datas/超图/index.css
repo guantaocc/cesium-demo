@@ -1,0 +1,7 @@
+#map {
+  height: 100vh;
+}
+
+.cesium-viewer-navigationContainer {
+  top: 50px;
+}

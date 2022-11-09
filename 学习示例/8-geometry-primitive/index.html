@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <script src="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Cesium.js"></script>
+  <link href="https://cesium.com/downloads/cesiumjs/releases/1.98/Build/Cesium/Widgets/widgets.css" rel="stylesheet">
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <script>
+    // 注册 cesium icon token
+    // Your access token can be found at: https://cesium.com/ion/tokens.
+    // Replace `your_access_token` with your Cesium ion access token.
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYTcyNGU3OC0yOTUzLTQ1N2UtYjA2MS1lZjY5ZTlhODdjZWQiLCJpZCI6MTEwNTE3LCJpYXQiOjE2NjUzMDQ2Mzd9.4O-a0UjkuBlv2Pb0yDMsWNMqZbQxUEkw0RQ2GMZ7JV4';
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+      terrainProvider: Cesium.createWorldTerrain({
+        requestVertexNormals: true,
+        requestWaterMask: true,
+        navigationHelpButton: true
+      })
+    });
+
+    // 使用entity方式 正方形材质 entity
+    // viewer.entities.add({
+    //   rectangle : {
+    //       coordinates : Cesium.Rectangle.fromDegrees(-100.0, 20.0, -90.0, 30.0),
+    //       material : new Cesium.StripeMaterialProperty({
+    //           evenColor: Cesium.Color.WHITE,
+    //           oddColor: Cesium.Color.BLUE,
+    //           repeat: 5
+    //       })
+    //   }
+    // });
+
+    // 使用 primitives
+    let instance = new Cesium.GeometryInstance({
+      geometry: new Cesium.RectangleGeometry({
+        rectangle: Cesium.Rectangle.fromDegrees(-100.0, 20.0, -90.0, 30.0),
+        vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT
+      }),
+      attributes : {
+        color : new Cesium.ColorGeometryInstanceAttribute(0.0, 0.0, 1.0, 0.8)
+      },
+      id: 'rectangle'
+    });
+
+    let anotherInstance = new Cesium.GeometryInstance({
+      geometry: new Cesium.RectangleGeometry({
+        rectangle: Cesium.Rectangle.fromDegrees(-85.0, 20.0, -75.0, 30.0),
+        vertexFormat: Cesium.EllipsoidSurfaceAppearance.VERTEX_FORMAT
+      }),
+      attributes: {
+        color : new Cesium.ColorGeometryInstanceAttribute(0.0, 0.0, 1.0, 0.2)
+      }
+    });
+    
+    let primitive = new Cesium.Primitive({
+      geometryInstances: [instance, anotherInstance],
+      appearance : new Cesium.PerInstanceColorAppearance()
+    })
+    viewer.scene.primitives.add(primitive);
+
+    // 获取某一个 primitive 的属性 并可更改
+    var attributes = primitive.getGeometryInstanceAttributes('rectangle');
+    console.log('primitive attributes', attributes)
+
+    // 创建一个外观, 图形用于图元之上
+    var appearance  = new Cesium.PerInstanceColorAppearance({
+      translucent : false,
+      closed : true
+    });
+    </script>
+  </div>
+</body>
+
+</html>

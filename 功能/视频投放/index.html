@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <!-- Include the CesiumJS JavaScript and CSS files -->
+  <link rel="stylesheet" href="/public/supermap/Build/Cesium/Widgets/widgets.css">
+  <script src="/public/supermap/Build/Cesium/Cesium.js"></script>
+  <script src="/public/supermap-config.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.1/jquery.js"></script>
+  <style>
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      position: relative;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .cesiumContainer {
+      position: absolute;
+      width: 100%;
+      height: 100vh;
+    }
+
+    .buttons {
+      position: absolute;
+      left: 20px;
+      top: 40px;
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="cesiumContainer"></div>
+  <div class="buttons">
+    <button id="active">开始投放</button>
+    <button id="clear">清除</button>
+  </div>
+  <video id="trailer" autoplay controls crossorigin loop muted width="100%" style="display: none;">
+    <source src="/public/zt.mp4" type="video/mp4" />
+    Sorry, your browser doesn't support embedded videos.
+  </video>
+  <script>
+    // 注册cesium icon token
+    // Your access token can be found at: https://cesium.com/ion/tokens.
+    // Replace `your_access_token` with your Cesium ion access token.
+
+    Cesium.Ion.defaultAccessToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYTcyNGU3OC0yOTUzLTQ1N2UtYjA2MS1lZjY5ZTlhODdjZWQiLCJpZCI6MTEwNTE3LCJpYXQiOjE2NjUzMDQ2Mzd9.4O-a0UjkuBlv2Pb0yDMsWNMqZbQxUEkw0RQ2GMZ7JV4';
+
+    // Initialize the Cesium Viewer in the HTML element with the `cesiumContainer` ID.
+    const viewer = new Cesium.Viewer('cesiumContainer', {
+    });
+
+    viewer.imageryLayers.addImageryProvider(new Cesium.BingMapsImageryProvider({
+      url: 'https://dev.virtualearth.net',
+      mapStyle: Cesium.BingMapsStyle.AERIAL,
+      key: URL_CONFIG.BING_MAP_KEY
+    }));
+
+    let scene = viewer.scene
+
+    var videoElement = document.getElementById('trailer');
+
+    var groundPromise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_CBD_GROUND1, {
+      name: 'ground1'
+    });
+    var buildPromise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_CBD_BUILD, {
+      name: 'build'
+    });
+    var lakePromise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_CBD_LAKE, {
+      name: 'lake'
+    });
+    var treePromise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_CBD_TREE, {
+      name: 'tree'
+    });
+    var roadPromise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_CBD_ROAD, {
+      name: 'road'
+    });
+
+    var bridgePromise = scene.addS3MTilesLayerByScp(URL_CONFIG.SCP_CBD_BRIDGE, {
+      name: 'bridge'
+    });
+
+    scene.debugShowFramesPerSecond = true;
+
+    Cesium.when.all([groundPromise, buildPromise, lakePromise, treePromise, roadPromise, bridgePromise], function (layers) {
+      scene.camera.setView({
+        destination: Cesium.Cartesian3.fromDegrees(116.4486, 39.9092, 91.3293),
+        orientation: {
+          heading: 3.179304500963121,
+          pitch: -0.46239072362282485,
+          roll: 6.283185307179583
+        }
+      });
+      for (var i = 0; i < layers.length; i++) {
+        layers[i].selectEnabled = false;
+      }
+
+      var videoElement = document.getElementById('trailer');
+
+      videoElement.play()
+
+      // superMap视频投放
+      var projectionImage = new Cesium.ProjectionImage(scene);
+
+      var handler = new Cesium.DrawHandler(viewer, Cesium.DrawMode.Point);
+
+      handler.movingEvt.addEventListener(function (windowPosition) {
+        var last = scene.pickPosition(windowPosition)
+        console.log(last)
+        //计算该点与视口位置点坐标的距离
+        var distance = Cesium.Cartesian3.distance(scene.camera.position, last);
+        if (distance > 0) {
+          var cartographic = Cesium.Cartographic.fromCartesian(last);
+          // 定位到点击的经纬度和高度
+          var longitude = Cesium.Math.toDegrees(cartographic.longitude);
+          var latitude = Cesium.Math.toDegrees(cartographic.latitude);
+          var height = cartographic.height;
+          // 设置投影的 目标点位
+          projectionImage.setDistDirByPoint([longitude, latitude, height]);
+          projectionImage.distance = 200
+        }
+      }) 
+      
+      function clearAndActive() {
+        projectionImage.distance = 1;
+        var wgsPosition = scene.camera.positionCartographic;
+        var longitude = Cesium.Math.toDegrees(wgsPosition.longitude);
+        var latitude = Cesium.Math.toDegrees(wgsPosition.latitude);
+        var height = wgsPosition.height;
+        // 观察者的位置，这里是设置 相机的位置, 也可设置固定位置
+        projectionImage.viewPosition = [longitude, latitude, height];
+        projectionImage.horizontalFov = 20;
+        projectionImage.verticalFov = 10;
+       
+        projectionImage.setImage({
+          video: videoElement
+        });
+        projectionImage.removeAllClipRegion();
+        projectionImage.build();
+
+        // projectionImage.hintLineColor = new Cesium.Color(0.5, 0.5, 1 ,1)
+        projectionImage.hintLineVisible = false
+      }
+      $("#active").click(function () {
+        clearAndActive()
+        handler.activate()
+      })
+      $("#clear").click(function (){
+        // 清除
+        clearAndActive()
+        handler.clear()
+      })
+    })
+
+  </script>
+  </div>
+</body>
+
+</html>

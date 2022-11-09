@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cesium demo</title>
+  <script src="./cenium-3d/Build/Cesium/Cesium.js"></script>
+    <link rel="stylesheet" href="./cenium-3d/Build/Cesium/Widgets/widgets.css">
+    <link rel="stylesheet" href="./cenium-3d/Build/Cesium/Widgets/InfoBox/InfoBoxDescription.css">
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  <div id="map"></div>
+  <script>
+     let viewer = new Cesium.Viewer("map", {
+        shadows : true,
+        homeButton: true,
+        infoBox: true,
+        fullscreenButton: true
+      });
+
+     viewer.extend(Cesium.viewerDragDropMixin);
+
+     let scene = viewer.scene
+     let imageryLayers = viewer.imageryLayers;
+
+     viewer.scene.globe.depthTestAgainstTerrain = false;
+
+     // bingmap
+      // viewer.imageryLayers.addImageryProvider(
+      //   new Cesium.BingMapsImageryProvider({
+      //     key: "Aq5-axJHKvvadhccIVkqa8rS6mnji5maWYQuEOP3DI2gog0vB03lr4xmeIdti78R", //可至官网（https://www.bingmapsportal.com/）申请key
+      //     url: "//dev.virtualearth.net",
+      //   })
+      // );
+
+    const URL_CONFIG = {
+      TOKEN_TIANDITU: '4a00a1dc5387b8ed8adba3374bd87e5e'
+    }
+
+    imageryLayers.addImageryProvider(new Cesium.TiandituImageryProvider({
+        token: URL_CONFIG.TOKEN_TIANDITU
+    }));
+    
+    console.log(URL_CONFIG.TOKEN_TIANDITU)
+    // 初始化天地图全球中文注记服务，并添加至影像图层
+    let labelImagery = new Cesium.TiandituImageryProvider({
+        mapStyle : Cesium.TiandituMapsStyle.CIA_C, //天地图全球中文注记服务（经纬度投影）
+        token: URL_CONFIG.TOKEN_TIANDITU
+    });
+    imageryLayers.addImageryProvider(labelImagery);
+
+
+    const defaultHomePosition = {
+      destination: Cesium.Cartesian3.fromDegrees(116.325806, 39.959949, 2000),
+      orientation: {
+          // 水平 - 正北 - 向右为负数
+          heading: Cesium.Math.toRadians(0),
+          // 上下旋转 - 俯视朝向 - 向上为负数
+          pitch: Cesium.Math.toRadians(-90),
+          roll: 0
+      }
+    }
+    
+    // 增加图形
+    let promise = scene.open('http://amana.caasbee.com/iserver/services/beisanhuan/rest/realspace')
+  
+    Cesium.when.all(promise, function(layers){
+        layers.forEach(function(item, index){
+          // 设置 3d tiles 的 bottom高程高度
+          item.style3D.bottomAltitude = -55
+          item.brightness = 2
+          item.visible = true
+        })
+      viewer.camera.setView(defaultHomePosition)
+    })
+
+    // home按钮动画
+    defaultHomePosition.duration = 2.0
+    // defaultHomePosition.maximumHeight = 2000;
+    // defaultHomePosition.pitchAdjustHeight = 2000;
+    defaultHomePosition.endTransform = Cesium.Matrix4.IDENTITY;
+
+    // 重写home按钮效果
+    viewer.homeButton.viewModel.command.beforeExecute.addEventListener(function (e){
+      e.cancel = true
+      viewer.scene.camera.flyTo(defaultHomePosition)
+    })
+
+    // MOUSE_MOVE 拾取坐标位置 pickPosition
+    // LEFT_CLICK 拾取实体的位置，进行操作(必须存在当前实体)
+    const handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
+    handler.setInputAction(function (movement) {
+      const pos = viewer.scene.pickPosition(movement.position);
+      let cartographic = Cesium.Cartographic.fromCartesian(pos);
+      let longitude = Cesium.Math.toDegrees(cartographic.longitude);
+      let latitude = Cesium.Math.toDegrees(cartographic.latitude);
+      let height = cartographic.height;
+      console.log(`经度${longitude} 纬度${latitude}`) 
+    }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+    // 添加广告牌
+    const entityDescription = {
+      billboard: {
+        verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+        // 可见距离
+        distanceDisplayCondition: new Cesium.DistanceDisplayCondition(10.0, 20000.0),
+      },
+      label: '国家图书馆'
+    }
+
+    // viewer.scene.entities.add(entityDescription)
+  </script>
+</body>
+</html>
