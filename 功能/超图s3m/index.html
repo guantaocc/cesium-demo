@@ -56,17 +56,13 @@
 
     let scene = viewer.scene
 
+
+    // 成都农业研究中心 104.080657,30.401038 - center: 
     const position = {
-      lontitude: 119.925297924,
-      latitude: 30.07939717989,
+      lontitude: 104.080657,
+      latitude: 30.401038,
       height: 30,
     }
-
-    // const position = {
-    //   lontitude: 113.91483485343562,
-    //   latitude: 35.31921353519262,
-    //   height: 30,
-    // }
 
     viewer.camera.flyTo({
       destination: Cesium.Cartesian3.fromDegrees(position.lontitude, position.latitude, position.height),
@@ -81,10 +77,15 @@
 
     // http://amana.caasbee.com/iserver/services/NKYjingwaiyanjiusuo/rest/maps/农田灌溉研究所_Level_20@农田灌溉研究所_Level_20
     // http://10.200.37.56:8090/iserver/services/map-sdtest/rest/maps/testsd_Level_20@testsd_Level_20
+
+    // 成都农业中心
+    // http://amana.caasbee.com/iserver/services/NKYjingwaiyanjiusuo/rest/maps/国家成都农业科技中心_Level_20%40国家成都农业科技中心_Level_20
+
+
     function loadSuperMapLayerByName(mapName) {
       let imageryLayers = viewer.imageryLayers;
       let SupermapProvider = new Cesium.SuperMapImageryProvider({
-        url: `http://10.200.37.56:8090/iserver/services/map-sdtest/rest/maps/testsd_Level_20@testsd_Level_20`,
+        url: `http://amana.caasbee.com/iserver/services/NKYjingwaiyanjiusuo/rest/maps/国家成都农业科技中心_Level_20%40国家成都农业科技中心_Level_20`,
         transparent: true,
         credit: "",
         highResolution: true,

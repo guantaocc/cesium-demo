@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="resources.title_vectorTileLayerNormal"></title>
+
+  <!-- 超图的包 -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" rel="stylesheet">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+  <script type="text/javascript" src="https://iclient.supermap.io/dist/leaflet/iclient-leaflet.js"></script>
+  <script src="/public/iclientLeaflet/proj4.js"></script>
+</head>
+
+<body style=" margin: 0;overflow: hidden;background: #fff;width: 100%;height:100%;position: absolute;top: 0;">
+  <div id="map" style="margin:0 auto;width: 100%;height: 100%"></div>
+  <!-- wmts: http://hebei.tianditu.gov.cn/tdtdevcenter/forJavaScript/web/introduction/leafletDevelop.html#ogcMapService -->
+  <!-- 文档: https://iclient.supermap.io/11.0.0/docs/leaflet/TiledVectorLayer.html -->
+  <script type="text/javascript">
+
+    // let url = 'https://iserver.supermap.io/iserver/services/map-china400/rest/maps/China'
+
+    // let url = 'http://support.supermap.com.cn:8090/iserver/services/map-china400/wms111/China'
+
+    //初始化图层
+    // var url = "http://support.supermap.com.cn:8090/iserver/services/map-china400/wmts100";
+    var url = 'http://amana.caasbee.com/iserver/services/shiliangwapian-wmts/wmts100'
+    // L.supermap.SecurityManager.registerToken(url, "RW6IBkaAZtVnrjdYPiXq-P9o-vyrOOtS7qR45anzTrqi-1fHJZeqv0AaZ9NXzXiVwlaOJbWg4A4vRu6xZtYcjCFdjHYENYV-A_wnpcFme-qJGu6DUPXs_8Wvcz6Q74ce1H5BQIG79vf9E2WQGFdZ1g..");
+
+    var res = [];
+    for (var i = 0; i < 22; i++) {
+      res.push(165664.43905455674 / (Math.pow(2, i)));
+    }
+    var map = L.map('map', {
+      center: [0, 0],
+      maxZoom: 18,
+      zoom: 0,
+      scale: 0,
+      crs: L.Proj.CRS("EPSG:3857",
+        {
+          origin: [-2.0037508342789244E7, 2.0037508342789244E7],
+          resolutions: res,
+          bounds: L.bounds([-2.0037508342789244E7, -2.0037508342789244E7], [2.0037508342789244E7, 2.0037508342789244E7])
+        })
+    });
+
+    var layer = L.supermap.wmtsLayer(url,
+      {
+        layer: "NKYMap_V",
+        style: "default",
+        tilematrixSet: "GlobalCRS84Scale_NKYMap_V",
+        format: "image/png",
+        requestEncoding:"KVP",
+      });
+    //加载图层
+    layer.addTo(map);
+  </script>
+</body>
+
+</html>
