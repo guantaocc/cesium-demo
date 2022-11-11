@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="resources.title_wmtsLayer"></title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" rel="stylesheet">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+  <script type="text/javascript" src="https://iclient.supermap.io/dist/leaflet/iclient-leaflet.js"></script>
+  <script src="https://cdnjs.com/libraries/proj4js"></script>
+</head>
+
+<body style=" margin: 0;overflow: hidden;background: #fff;width: 100%;height:100%;position: absolute;top: 0;">
+  <div id="map" style="margin:0 auto;width: 100%;height: 100%"></div>
+
+  <script type="text/javascript">
+    proj4.defs("EPSG:4490", "+proj=longlat +ellps=GRS80 +no_defs");
+    var res = [
+      0.08789062499999999,
+      0.08789062499995082,
+      0.04394531249997541,
+      0.021972656250106533,
+      0.010986328125053266,
+      0.005493164062526633,
+      0.002746582031144477,
+      0.001373291015453399,
+      6.866455077266995E-4,];
+      
+    var map = L.map('map', {
+      // 调整地图中心点 经纬度
+      center: [114.74721254733845, 32.5665352689922],
+      zoom: 0,
+      maxZoom: 21,
+      crs: new L.Proj.CRS("EPSG:4490", {
+        origin: [-35.5, 103.5],
+        resolutions: res,
+        bounds: L.bounds([-35.5, -103.5], [35.5, 103.5])
+      })
+    });
+    L.supermap.wmtsLayer("http://amana.caasbee.com/iserver/services/yingxiangerwei/wmts100/?token=RW6IBkaAZtVnrjdYPiXq-P9o-vyrOOtS7qR45anzTrqi-1fHJZeqv0AaZ9NXzXiVwlaOJbWg4A4vRu6xZtYcjCFdjHYENYV-A_wnpcFme-qJGu6DUPXs_8Wvcz6Q74ce1H5BQIG79vf9E2WQGFdZ1g..", {
+      layer: "China_16m_DOM@nkyyingxiang",
+      style: "default",
+      tilematrixSet: "Custom_China_16m_DOM@nkyyingxiang",
+      format: "image/png",
+      requestEncoding: 'REST'
+    }
+    ).addTo(map);
+  </script>
+</body>
+
+</html>

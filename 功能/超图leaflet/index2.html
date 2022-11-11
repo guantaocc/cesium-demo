@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title data-i18n="resources.title_vectorTileLayerNormal"></title>
+
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" rel="stylesheet">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+  <script type="text/javascript" src="https://iclient.supermap.io/dist/leaflet/iclient-leaflet.js"></script>
+  <script src="https://cdnjs.com/libraries/proj4js"></script>
+  <style>
+    body {
+      width: 100%;
+      height: 100vh;
+    }
+  </style>
+</head>
+
+<body style=" margin: 0;overflow: hidden;background: #fff;width: 100%;height:100%;position: absolute;top: 0;">
+  <div id="map" style="margin:0 auto;width: 100%;height: 100%"></div>
+  <!-- wmts: http://hebei.tianditu.gov.cn/tdtdevcenter/forJavaScript/web/introduction/leafletDevelop.html#ogcMapService -->
+  <!-- 文档: https://iclient.supermap.io/11.0.0/docs/leaflet/TiledVectorLayer.html -->
+  <script type="text/javascript">
+
+    proj4.defs("EPSG:4490", "+proj=longlat +ellps=GRS80 +no_defs");
+
+    var crs = L.Proj.CRS("EPSG:4490", {
+      bounds: L.bounds([-180, -85.05112877996838], [180, 85.05112877996834]),
+      origin: [-180, 85.05112877996834],
+    });
+
+    var map = L.map('map', {
+      center: [114.74721254733845, 32.5665352689922],
+      zoom: 0,
+      crs: crs
+    });
+
+    L.supermap.wmtsLayer("http://amana.caasbee.com/iserver/services/yingxiangerwei/wmts100?token=RW6IBkaAZtVnrjdYPiXq-P9o-vyrOOtS7qR45anzTrqi-1fHJZeqv0AaZ9NXzXiVwlaOJbWg4A4vRu6xZtYcjCFdjHYENYV-A_wnpcFme-qJGu6DUPXs_8Wvcz6Q74ce1H5BQIG79vf9E2WQGFdZ1g..", {
+        layer: "China_16m_DOM@nkyyingxiang",
+        style: "default",
+        tilematrixSet: "Custom_China_16m_DOM@nkyyingxiang",
+        format: "image/png",
+        requestEncoding: 'KVP'
+      }
+    ).addTo(map);
+  </script>
+</body>
+
+</html>
